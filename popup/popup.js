@@ -8,8 +8,9 @@ const PROVIDERS = {
     model: "~typesafe/jev-latest",
     label: "OpenRouter",
     headers: {
+      // HTTP 头只允许 ISO-8859-1，标题必须 ASCII（含中文会直接抛 Fetch 异常）
       "HTTP-Referer": "https://github.com/ai-suifeng/twitter-laji-fliter-chrome",
-      "X-OpenRouter-Title": "Twitter 评论净化 · Jev",
+      "X-OpenRouter-Title": "twitter-laji-fliter-chrome",
     },
   },
 };
