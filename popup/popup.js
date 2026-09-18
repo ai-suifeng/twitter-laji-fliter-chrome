@@ -9,9 +9,13 @@ const PROVIDERS = {
 init();
 
 async function init() {
-  const s = await chrome.storage.local.get(["apiKey", "provider", "enabled", "blockedCount", "keyInvalid"]);
-  $("inp-key").value = s.apiKey ?? "";
-  $("sel-provider").value = s.provider ?? "typesafe";
+  const s = await chrome.storage.local.get(["apiKeys", "apiKey", "provider", "enabled", "blockedCount", "keyInvalid"]);
+  // 每个服务商各自一把 key；旧版单 key 数据迁移到 typesafe 名下
+  const apiKeys = s.apiKeys ?? (s.apiKey ? { typesafe: s.apiKey } : {});
+  const providerId = s.provider ?? "typesafe";
+
+  $("sel-provider").value = providerId;
+  $("inp-key").value = apiKeys[providerId] ?? "";
   $("chk-enabled").checked = s.enabled !== false;
   $("blocked-count").textContent = s.blockedCount ?? 0;
   $("key-invalid").classList.toggle("hidden", !s.keyInvalid);
@@ -20,15 +24,24 @@ async function init() {
     $("settings").classList.toggle("hidden");
     $("main").classList.toggle("hidden");
   };
+  // 切换服务商：key 输入框跟着显示对应服务商已保存的 key
+  $("sel-provider").onchange = () => {
+    $("inp-key").value = apiKeys[$("sel-provider").value] ?? "";
+    $("test-result").classList.add("hidden");
+    $("test-result").textContent = "";
+  };
   $("btn-save").onclick = saveSettings;
   $("btn-test").onclick = testConnection;
   $("chk-enabled").onchange = (e) => chrome.storage.local.set({ enabled: e.target.checked });
 }
 
 async function saveSettings() {
+  const providerId = $("sel-provider").value;
+  const { apiKeys = {} } = await chrome.storage.local.get("apiKeys");
+  apiKeys[providerId] = $("inp-key").value.trim();
   await chrome.storage.local.set({
-    apiKey: $("inp-key").value.trim(),
-    provider: $("sel-provider").value,
+    apiKeys,
+    provider: providerId,
     keyInvalid: false, // 换 key 后清除 401 标记，判断自动恢复
   });
   $("btn-save").textContent = "已保存";

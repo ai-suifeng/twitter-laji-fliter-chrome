@@ -28,7 +28,8 @@ async function init() {
       keyMissing = false;
       if (enabled) scan();
     }
-    if (changes.apiKey) {
+    // 保存 key（按服务商分存于 apiKeys）后恢复判断
+    if (changes.apiKeys || changes.apiKey) {
       keyMissing = false;
       chrome.storage.local.set({ keyInvalid: false });
       if (enabled) scan();

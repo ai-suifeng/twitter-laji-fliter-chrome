@@ -63,6 +63,8 @@ content script（常驻推特页面）                background service worker
 ## 配置项
 
 点插件图标右上角 **⚙** 打开设置：选择服务商、填入 API key、**测试连接**。
+**每个服务商各自保存一把 key**（`apiKeys: { typesafe, openrouter }`），切换服务商时
+输入框自动带出对应 key，互不干扰；旧版单 key 自动迁移为 TypeSafe 的 key。
 
 | 服务商 | 端点 / 模型 | 状态 |
 | --- | --- | --- |

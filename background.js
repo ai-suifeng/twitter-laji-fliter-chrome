@@ -47,9 +47,11 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 async function judge(items) {
-  const { apiKey, provider: providerId } = await chrome.storage.local.get(["apiKey", "provider"]);
-  if (!apiKey) throw new Error("未设置 API key，请点插件图标配置");
+  const { apiKeys, apiKey, provider: providerId } = await chrome.storage.local.get(["apiKeys", "apiKey", "provider"]);
   const provider = PROVIDERS[providerId] ?? PROVIDERS.typesafe;
+  // 每个服务商各自的 key；旧版单 key（apiKey）只归 typesafe
+  const key = apiKeys?.[providerId] ?? (providerId === "typesafe" || !providerId ? apiKey : undefined);
+  if (!key) throw new Error("未设置 API key，请点插件图标配置");
 
   const questions = {};
   items.forEach((item, idx) => {
@@ -67,7 +69,7 @@ async function judge(items) {
       model: provider.model,
       questions,
     },
-    apiKey,
+    key,
     provider,
   );
 
