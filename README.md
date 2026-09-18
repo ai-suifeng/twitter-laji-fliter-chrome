@@ -67,7 +67,7 @@ content script（常驻推特页面）                background service worker
 | 服务商 | 端点 / 模型 | 状态 |
 | --- | --- | --- |
 | TypeSafe 官方（默认） | `api.typesafe.ai/v1/systemone` · `jev-latest` | 可用 |
-| OpenRouter | `openrouter.ai/api/v1/systemone` · `typesafe/jev-latest` | 实测 2026-09 其目录与端点尚未上架 Jev；上架后无需改代码，切服务商 → 测试连接 → 保存即可 |
+| OpenRouter | `openrouter.ai/api/v1/systemone` · `typesafe/jev-latest` | 模型页已上线（[$0.042/M 输入，输出免费，32k 上下文](https://openrouter.ai/~typesafe/jev-latest)）；实测 2026-09-18 其 API 目录与 systemone 端点尚未就绪（404），属灰度上线。真正可用后：切服务商 → 测试连接 → 保存，无需改代码 |
 
 「测试连接」用**输入框当前**的 key 和所选服务商直发一个最小请求，内联显示真实结果
 （成功返回 noul 值 / 401 key 无效 / 404 端点未上架 / 网络错误），并自动识别把
