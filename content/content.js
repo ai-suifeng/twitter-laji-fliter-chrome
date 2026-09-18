@@ -36,7 +36,7 @@ async function init() {
 
   // SPA：DOM 变化防抖扫描 + 定时兜底（React 虚拟列表回收节点后会重新出现）
   let scanTimer = null;
-  const observer = new MutationObserver(() => {
+  observer = new MutationObserver(() => {
     if (scanTimer) return;
     scanTimer = setTimeout(() => {
       scanTimer = null;
@@ -44,9 +44,12 @@ async function init() {
     }, 500);
   });
   observer.observe(document.body, { childList: true, subtree: true });
-  setInterval(scan, 2500);
+  intervalId = setInterval(scan, 2500);
   scan();
 }
+
+let intervalId = null;
+let observer = null;
 
 function scan() {
   if (!enabled || keyMissing || !location.pathname.includes("/status/")) return;
@@ -64,10 +67,10 @@ function scan() {
     if (state) return; // judging / clean 已处理
 
     const textEl = article.querySelector('[data-testid="tweetText"]');
-    const text = normWs(textEl?.innerText ?? "");
+    const text = stripInvisible(normWs(textEl?.innerText ?? ""));
     if (!text) return;
     // 色情/引流信号常藏在昵称里（"同城上门""线下选妃"），必须一起送判断
-    const author = extractAuthor(article);
+    const author = stripInvisible(extractAuthor(article));
 
     const hit = cache.get(hash(author, text));
     if (hit) {
@@ -86,6 +89,15 @@ function scan() {
 function extractAuthor(article) {
   const nameEl = article.querySelector('[data-testid="User-Name"]');
   return normWs(nameEl?.innerText?.split("\n")[0] ?? "");
+}
+
+/**
+ * 剥离隐形 Unicode 字符（零宽连接符/软换行/双向标记等）。
+ * 垃圾评论用它绕过审核，同时把中文切碎导致模型读不出黑话（"我‌‍福‍‌不‌‍黑"）。
+ * 确定性清洗属于代码职责，不该交给模型硬猜。
+ */
+function stripInvisible(s) {
+  return s.replace(/[\u200B-\u200F\u2060-\u2065\uFEFF\u00AD\u180E]/g, "");
 }
 
 /** 内容侧攒批：一个滚动窗口内的回复合并成一次 API 请求 */
@@ -114,10 +126,19 @@ async function flush() {
     if (!res?.ok) throw new Error(res?.error ?? "判断失败");
     verdicts = res.verdicts;
   } catch (err) {
+    const m = String(err.message ?? err);
+    // 插件在 chrome://extensions 重载后，本页旧脚本成为孤儿，所有消息必然失败：
+    // 停止扫描并提示刷新，避免无声空转（这就是"必须刷新才生效"的来源）
+    if (/Extension context invalidated|Receiving end does not exist/.test(m)) {
+      if (intervalId) clearInterval(intervalId);
+      observer?.disconnect();
+      console.warn("[评论净化] 插件已重新加载，请刷新本页以恢复屏蔽功能");
+      return;
+    }
     // 失败按未命中处理，下轮滚动缓存未写入会重试；缺 key 则挂起等配置
     batch.forEach(([, v]) => (v.article.dataset.jevState = ""));
-    if (/API key/.test(String(err.message))) keyMissing = true;
-    console.warn("[评论净化] 判断失败：", err.message);
+    if (/API key/.test(m)) keyMissing = true;
+    console.warn("[评论净化] 判断失败：", m);
     return;
   }
 
@@ -172,8 +193,8 @@ function hide(article, reason, v) {
 /** React 重渲染会丢掉占位节点，扫描时补挂 */
 function ensureHidden(article) {
   if (!article.previousSibling?.classList?.contains("jev-shield-placeholder")) {
-    const text = normWs(article.querySelector('[data-testid="tweetText"]')?.innerText ?? "");
-    const v = cache.get(hash(extractAuthor(article), text));
+    const text = stripInvisible(normWs(article.querySelector('[data-testid="tweetText"]')?.innerText ?? ""));
+    const v = cache.get(hash(stripInvisible(extractAuthor(article)), text));
     if (v) hide(article, v.porn >= POLICY.pornThreshold ? "疑似色情" : "疑似恶意", v);
   }
 }
