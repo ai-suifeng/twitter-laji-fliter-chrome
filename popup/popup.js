@@ -66,7 +66,11 @@ async function testConnection() {
     return;
   }
   if (providerId === "typesafe" && apiKey.startsWith("sk-or-")) {
-    showResult("error", "✗ 这是 OpenRouter 的 key（sk-or- 开头），发到 TypeSafe 官方必然 401。请切换服务商为 OpenRouter，或换 TypeSafe 的 key");
+    showResult("error", "✗ 这是 OpenRouter 的 key（sk-or- 开头），发到 TypeSafe 官方必然 401。请切换服务商为 OpenRouter，或换 TypeSafe 的 key（在 console.typesafe.ai/keys 创建，以 apikey_ 开头）");
+    return;
+  }
+  if (providerId === "typesafe" && !apiKey.startsWith("apikey_")) {
+    showResult("error", `✗ 格式可疑：TypeSafe 官方的 key 以 apikey_ 开头（在 console.typesafe.ai/keys 创建），当前输入以 ${apiKey.slice(0, 8)}… 开头，多半属于其他平台`);
     return;
   }
 
