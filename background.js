@@ -2,10 +2,18 @@
 // 每条推文两个 Noul 问题：是否色情 / 是否恶意，任一超阈值由内容侧决定屏蔽
 
 // 服务商路由（与 popup.js 的 PROVIDERS 保持一致；改端点/模型名时两处同步）
-// 实测 2026-09：OpenRouter 尚未上架 Jev（/v1/systemone 返回 404），选项保留待其支持
+// OpenRouter 契约（官方示例）：POST /api/alpha/decisions，模型名带波浪号 ~typesafe/jev-latest，
+// body/响应与 TypeSafe systemone 同构
 const PROVIDERS = {
   typesafe: { url: "https://api.typesafe.ai/v1/systemone", model: "jev-latest" },
-  openrouter: { url: "https://openrouter.ai/api/v1/systemone", model: "typesafe/jev-latest" },
+  openrouter: {
+    url: "https://openrouter.ai/api/alpha/decisions",
+    model: "~typesafe/jev-latest",
+    headers: {
+      "HTTP-Referer": "https://github.com/ai-suifeng/twitter-laji-fliter-chrome",
+      "X-OpenRouter-Title": "Twitter 评论净化 · Jev",
+    },
+  },
 };
 
 const PORN_QUESTION = {
@@ -87,7 +95,7 @@ async function postWithRetry(body, apiKey, provider, maxRetries = 2) {
       // 挂起保护：20s 无响应按失败处理，否则 SW 可能被回收且毫无痕迹
       res = await fetch(provider.url, {
         method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", ...provider.headers },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(20000),
       });

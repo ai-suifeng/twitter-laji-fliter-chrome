@@ -3,7 +3,15 @@ const $ = (id) => document.getElementById(id);
 // 与 background.js 的 PROVIDERS 保持一致（改端点/模型名时两处同步）
 const PROVIDERS = {
   typesafe: { url: "https://api.typesafe.ai/v1/systemone", model: "jev-latest", label: "TypeSafe 官方" },
-  openrouter: { url: "https://openrouter.ai/api/v1/systemone", model: "typesafe/jev-latest", label: "OpenRouter" },
+  openrouter: {
+    url: "https://openrouter.ai/api/alpha/decisions",
+    model: "~typesafe/jev-latest",
+    label: "OpenRouter",
+    headers: {
+      "HTTP-Referer": "https://github.com/ai-suifeng/twitter-laji-fliter-chrome",
+      "X-OpenRouter-Title": "Twitter 评论净化 · Jev",
+    },
+  },
 };
 
 init();
@@ -83,7 +91,7 @@ async function testConnection() {
   try {
     const res = await fetch(provider.url, {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", ...provider.headers },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(20000),
     });
@@ -104,7 +112,7 @@ async function testConnection() {
     } else if (res.status === 401) {
       showResult("error", `✗ key 无效（401，${secs}s）：${provider.label} 拒绝了这把 key。确认 key 属于所选服务商且未过期`);
     } else if (res.status === 404) {
-      showResult("error", `✗ 端点不存在（404）：${provider.label} 暂未上架 Jev 的 systemone 接口，请先用 TypeSafe 官方`);
+      showResult("error", `✗ 端点不存在（404）：${provider.label} 的 decisions 接口不可达，接口路径可能已变更`);
     } else {
       showResult("error", `✗ HTTP ${res.status}（${secs}s）→ ${text.slice(0, 160)}`);
     }
