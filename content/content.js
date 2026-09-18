@@ -30,6 +30,7 @@ async function init() {
     }
     if (changes.apiKey) {
       keyMissing = false;
+      chrome.storage.local.set({ keyInvalid: false });
       if (enabled) scan();
     }
   });
@@ -135,9 +136,16 @@ async function flush() {
       console.warn("[评论净化] 插件已重新加载，请刷新本页以恢复屏蔽功能");
       return;
     }
-    // 失败按未命中处理，下轮滚动缓存未写入会重试；缺 key 则挂起等配置
+    // 失败按未命中处理，下轮滚动缓存未写入会重试；401/缺 key 则挂起等配置
     batch.forEach(([, v]) => (v.article.dataset.jevState = ""));
-    if (/API key/.test(m)) keyMissing = true;
+    // 注意顺序：401 的错误文本里也含 "API key"，必须先判 401
+    if (/API 401/.test(m)) {
+      keyMissing = true;
+      chrome.storage.local.set({ keyInvalid: true });
+      console.warn("[评论净化] API key 无效（401），已挂起：请在插件里更换有效 key");
+    } else if (/API key/.test(m)) {
+      keyMissing = true;
+    }
     console.warn("[评论净化] 判断失败：", m);
     return;
   }

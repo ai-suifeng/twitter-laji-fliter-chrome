@@ -3,10 +3,11 @@ const $ = (id) => document.getElementById(id);
 init();
 
 async function init() {
-  const s = await chrome.storage.local.get(["apiKey", "enabled", "blockedCount"]);
+  const s = await chrome.storage.local.get(["apiKey", "enabled", "blockedCount", "keyInvalid"]);
   $("inp-key").value = s.apiKey ?? "";
   $("chk-enabled").checked = s.enabled !== false;
   $("blocked-count").textContent = s.blockedCount ?? 0;
+  $("key-invalid").classList.toggle("hidden", !s.keyInvalid);
 
   $("btn-save").onclick = async () => {
     await chrome.storage.local.set({ apiKey: $("inp-key").value.trim() });
