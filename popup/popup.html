@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Twitter 评论净化 <span class="sub">Jev</span></h1>
+    </header>
+
+    <section>
+      <label>
+        TypeSafe API key
+        <div class="row">
+          <input id="inp-key" type="password" placeholder="sk-..." />
+          <button id="btn-save">保存</button>
+        </div>
+      </label>
+      <label class="toggle">
+        <input id="chk-enabled" type="checkbox" />
+        启用实时屏蔽（仅推文详情页的回复）
+      </label>
+      <p class="stat">已屏蔽 <b id="blocked-count">0</b> 条</p>
+      <p class="hint">
+        打开任意推文详情页，回复会自动判断；命中的回复被替换为「🚫 已屏蔽」，点击可查看原文。
+      </p>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

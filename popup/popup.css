@@ -1,0 +1,78 @@
+body {
+  width: 320px;
+  margin: 0;
+  padding: 14px;
+  box-sizing: border-box;
+  background: #101418;
+  color: #e8ecf1;
+  font: 13px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+header {
+  margin-bottom: 10px;
+}
+header h1 {
+  font-size: 15px;
+  margin: 0;
+}
+header .sub {
+  color: #8b95a1;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+label {
+  display: block;
+  color: #8b95a1;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.row {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+input[type="password"] {
+  flex: 1;
+  background: #1a2028;
+  border: 1px solid #2a323d;
+  border-radius: 6px;
+  color: #e8ecf1;
+  padding: 6px 8px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e8ecf1;
+  cursor: pointer;
+}
+
+button {
+  background: #1a2028;
+  color: #e8ecf1;
+  border: 1px solid #2a323d;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.stat {
+  color: #8b95a1;
+  font-size: 13px;
+}
+.stat b {
+  color: #ff5c5c;
+  font-size: 16px;
+}
+
+.hint {
+  color: #8b95a1;
+  font-size: 12px;
+  margin: 8px 0 0;
+}

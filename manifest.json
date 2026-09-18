@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Twitter 评论净化 · Jev",
+  "version": "0.1.0",
+  "description": "实时检测推特回复中的色情/恶意内容，命中即屏蔽（可点击查看），由 Jev 提供判断",
+  "permissions": ["storage"],
+  "host_permissions": ["https://api.typesafe.ai/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://twitter.com/*", "https://x.com/*"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Twitter 评论净化 · Jev"
+  }
+}
