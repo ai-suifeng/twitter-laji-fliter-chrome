@@ -1,5 +1,5 @@
 body {
-  width: 320px;
+  width: 340px;
   margin: 0;
   padding: 14px;
   box-sizing: border-box;
@@ -9,6 +9,9 @@ body {
 }
 
 header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 10px;
 }
 header h1 {
@@ -20,6 +23,14 @@ header .sub {
   font-size: 11px;
   font-weight: normal;
 }
+button.icon {
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none !important;
+}
 
 label {
   display: block;
@@ -28,12 +39,24 @@ label {
   margin-bottom: 10px;
 }
 
+select {
+  width: 100%;
+  margin-top: 4px;
+  background: #1a2028;
+  border: 1px solid #2a323d;
+  border-radius: 6px;
+  color: #e8ecf1;
+  padding: 6px 8px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
 .row {
   display: flex;
   gap: 6px;
   margin-top: 4px;
 }
-input[type="password"] {
+input[type="text"] {
   flex: 1;
   background: #1a2028;
   border: 1px solid #2a323d;
@@ -42,6 +65,7 @@ input[type="password"] {
   padding: 6px 8px;
   font: inherit;
   box-sizing: border-box;
+  min-width: 0;
 }
 
 .toggle {
@@ -60,6 +84,13 @@ button {
   padding: 6px 12px;
   cursor: pointer;
   font: inherit;
+}
+button.primary {
+  width: 100%;
+  padding: 8px;
+  background: #4f8cff;
+  border-color: #4f8cff;
+  color: #fff;
 }
 
 .stat {
@@ -81,4 +112,17 @@ button {
   color: #ff5c5c;
   font-size: 12px;
   margin: 4px 0 8px;
+}
+
+.test-result {
+  font-size: 12px;
+  margin: 8px 0 0;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+.test-result.ok {
+  color: #35c48d;
+}
+.test-result.error {
+  color: #ff5c5c;
 }

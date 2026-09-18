@@ -62,6 +62,17 @@ content script（常驻推特页面）                background service worker
 
 ## 配置项
 
+点插件图标右上角 **⚙** 打开设置：选择服务商、填入 API key、**测试连接**。
+
+| 服务商 | 端点 / 模型 | 状态 |
+| --- | --- | --- |
+| TypeSafe 官方（默认） | `api.typesafe.ai/v1/systemone` · `jev-latest` | 可用 |
+| OpenRouter | `openrouter.ai/api/v1/systemone` · `typesafe/jev-latest` | 实测 2026-09 其目录与端点尚未上架 Jev；上架后无需改代码，切服务商 → 测试连接 → 保存即可 |
+
+「测试连接」用**输入框当前**的 key 和所选服务商直发一个最小请求，内联显示真实结果
+（成功返回 noul 值 / 401 key 无效 / 404 端点未上架 / 网络错误），并自动识别把
+OpenRouter 的 key（`sk-or-` 开头）发到 TypeSafe 官方的错配情况。
+
 | 位置 | 配置 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `content/content.js` → `POLICY.pornThreshold` | 0.5 | 色情概率屏蔽线 |

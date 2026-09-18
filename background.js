@@ -1,8 +1,12 @@
-// service worker：代 content script 调 TypeSafe API（content script 受页面 CORS 限制）
+// service worker：代 content script 调 Jev（content script 受页面 CORS 限制）
 // 每条推文两个 Noul 问题：是否色情 / 是否恶意，任一超阈值由内容侧决定屏蔽
 
-const API_URL = "https://api.typesafe.ai/v1/systemone";
-const MODEL = "jev-latest";
+// 服务商路由（与 popup.js 的 PROVIDERS 保持一致；改端点/模型名时两处同步）
+// 实测 2026-09：OpenRouter 尚未上架 Jev（/v1/systemone 返回 404），选项保留待其支持
+const PROVIDERS = {
+  typesafe: { url: "https://api.typesafe.ai/v1/systemone", model: "jev-latest" },
+  openrouter: { url: "https://openrouter.ai/api/v1/systemone", model: "typesafe/jev-latest" },
+};
 
 const PORN_QUESTION = {
   type: "noul",
@@ -43,8 +47,9 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 async function judge(items) {
-  const { apiKey } = await chrome.storage.local.get("apiKey");
+  const { apiKey, provider: providerId } = await chrome.storage.local.get(["apiKey", "provider"]);
   if (!apiKey) throw new Error("未设置 API key，请点插件图标配置");
+  const provider = PROVIDERS[providerId] ?? PROVIDERS.typesafe;
 
   const questions = {};
   items.forEach((item, idx) => {
@@ -59,10 +64,11 @@ async function judge(items) {
         platform: "twitter",
         tweets: items.map((it) => ({ author: it.author ?? "", text: it.text })),
       },
-      model: MODEL,
+      model: provider.model,
       questions,
     },
     apiKey,
+    provider,
   );
 
   return items.map((_it, idx) => ({
@@ -71,13 +77,13 @@ async function judge(items) {
   }));
 }
 
-async function postWithRetry(body, apiKey, maxRetries = 2) {
+async function postWithRetry(body, apiKey, provider, maxRetries = 2) {
   let delay = 1000;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     let res;
     try {
       // 挂起保护：20s 无响应按失败处理，否则 SW 可能被回收且毫无痕迹
-      res = await fetch(API_URL, {
+      res = await fetch(provider.url, {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -91,11 +97,11 @@ async function postWithRetry(body, apiKey, maxRetries = 2) {
     }
     if (res.ok) return res.json();
     if (res.status === 429 || res.status === 529) {
-      if (attempt === maxRetries) throw new Error(`TypeSafe API 过载（${res.status}）`);
+      if (attempt === maxRetries) throw new Error(`API 过载（${res.status}）`);
       await new Promise((r) => setTimeout(r, delay));
       delay *= 2;
       continue;
     }
-    throw new Error(`TypeSafe API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    throw new Error(`API ${res.status}: ${(await res.text()).slice(0, 200)}`);
   }
 }
